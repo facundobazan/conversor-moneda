@@ -25,18 +25,25 @@ public class CurrencyService {
         Path currencyFile = Paths.get("./resources/currency");
         //System.out.println(Paths.get("resources/currency").toAbsolutePath());
         Scanner sc = new Scanner(currencyFile, StandardCharsets.UTF_8);
-        sc.useDelimiter("[\t\n]+");
+        sc.useDelimiter("[,;\\t\\n\\r]+");
 
         while (sc.hasNext()){
-            Currency currency = new Currency();
-            currency.setCountry(sc.next());
-            currency.setCurrencyName(sc.next());
-            currency.setAbbreviation(sc.next());
-            currency.setCode(sc.next());
-
+            Currency currency = new Currency(sc.next(), sc.next());
             currencies.add(currency);
         }
+    }
 
-        currencies.forEach(System.out::println);
+    public ArrayList<Currency> getCurrencies(){
+        return this.currencies;
+    }
+
+    public Currency getCurrencyByAbbreviation(String abbreviation){
+        return (Currency) this.currencies.stream()
+                .filter(currency -> currency.getAbbreviation() == abbreviation);
+    }
+
+    public Currency getCurrencyByName(String currencyName){
+        return (Currency) this.currencies.stream()
+                .filter(currency -> currency.getCurrencyName() == currencyName);
     }
 }
