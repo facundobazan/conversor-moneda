@@ -11,6 +11,7 @@ public class CurrencyOption extends JDialog {
     private JButton btnReiniciar;
 
     public CurrencyOption() {
+        contentPane.setSize(300,160);
         setContentPane(contentPane);
         setModal(true);
         getRootPane().setDefaultButton(btnContinuar);

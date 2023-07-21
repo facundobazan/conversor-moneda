@@ -20,9 +20,9 @@ public class Main {
 
     public static void main(String[] args) {
         MainForm mf = new MainForm();
-        /*mf.setContentPane(new MainForm().panel);
+        mf.setContentPane(new MainForm().panel);
         mf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        mf.setResizable(false);*/
+        mf.setResizable(false);
 
 
         mf.setVisible(true);
