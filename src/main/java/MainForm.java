@@ -1,12 +1,11 @@
 import javax.swing.*;
-import javax.swing.event.ListDataListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Scanner;
 
 public class MainForm extends JFrame{
-    protected String[] conversionOptions = {"Divisas", "Temperaturas", "Medidas"};
-    private JComboBox cboConverter;
+    private JComboBox cboConverter = new JComboBox();
     private JButton btnAccept;
     private JButton btnCancel;
     protected JPanel panel;
@@ -14,8 +13,21 @@ public class MainForm extends JFrame{
     public MainForm() {
         btnAccept.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btnCancel.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        //conversionOptions = new String[]
-        cboConverter = new JComboBox(conversionOptions);
+        cboConverter.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        cboConverter.addItem("Seleccione una opción");
+        cboConverter.addItem("Divisas");
+        cboConverter.addItem("Temperaturas");
+        cboConverter.addItem("Medidas");
+
+        panel = new JPanel();
+        panel.add(cboConverter);
+        panel.add(btnAccept);
+        panel.add(btnCancel);
+
+        panel.setSize(350, 200);
+
+
 
         btnCancel.addActionListener(new ActionListener() {
             @Override
@@ -36,6 +48,7 @@ public class MainForm extends JFrame{
             public void actionPerformed(ActionEvent actionEvent) {
                 System.out.printf(cboConverter.getSelectedItem().toString());
                 switch (cboConverter.getSelectedItem().toString()){
+                    case "Divisas":
 
                 }
 
@@ -44,15 +57,12 @@ public class MainForm extends JFrame{
     }
 
     public static void main(String[] args) {
-        /*
         MainForm mf = new MainForm();
         mf.setContentPane(new MainForm().panel);
         mf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         mf.setResizable(false);
 
-
         mf.setVisible(true);
         mf.pack();
-        */
     }
 }
