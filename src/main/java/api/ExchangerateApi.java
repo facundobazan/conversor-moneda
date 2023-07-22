@@ -3,6 +3,7 @@ package api;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import model.Divisa;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -22,8 +23,8 @@ public class ExchangerateApi {
         url_str = "https://v6.exchangerate-api.com/v6/" + apiKey + "/latest/";
     }
 
-    public Double getConvertion(Double value, String sourceCurrency, String targetCurrency) throws IOException {
-        URL url = new URL(url_str.concat(targetCurrency));
+    public Double getConvertion(Double value, Divisa sourceCurrency, Divisa targetCurrency) throws IOException {
+        URL url = new URL(url_str.concat(targetCurrency.toString()));
         HttpURLConnection request = (HttpURLConnection) url.openConnection();
         request.connect();
 
@@ -32,7 +33,7 @@ public class ExchangerateApi {
         JsonElement root = jp.parse(new InputStreamReader((InputStream) request.getContent()));
         JsonObject jsonobj = root.getAsJsonObject().get("conversion_rates").getAsJsonObject();
 
-        Double result = jsonobj.get(sourceCurrency.toUpperCase()).getAsDouble();
+        Double result = jsonobj.get(sourceCurrency.toString()).getAsDouble();
 
         return value * result;
 

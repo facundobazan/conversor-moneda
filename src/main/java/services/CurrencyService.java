@@ -1,6 +1,8 @@
 package services;
 
+import api.ExchangerateApi;
 import model.Currency;
+import model.Divisa;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -45,5 +47,11 @@ public class CurrencyService {
     public Currency getCurrencyByName(String currencyName){
         return (Currency) this.currencies.stream()
                 .filter(currency -> currency.getCurrencyName() == currencyName);
+    }
+
+    public Double convertCurrent(Double value, Divisa sourceCurrency, Divisa targetCurrency) throws IOException {
+        ExchangerateApi exchangerateApi = new ExchangerateApi();
+
+        return exchangerateApi.getConvertion(value, sourceCurrency, targetCurrency);
     }
 }

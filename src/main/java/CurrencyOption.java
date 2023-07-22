@@ -1,23 +1,34 @@
+import model.Divisa;
+import services.CurrencyService;
+
 import javax.swing.*;
 import java.awt.event.*;
+import java.io.IOException;
+import java.text.NumberFormat;
+import java.util.Arrays;
 
 public class CurrencyOption extends JDialog {
-    private String[] currencies = {"Selecciona una opción", "Pesos Argentinos", "Dolar", "Euros", "Libras Esterlinas", "Yen Japonés", "Won"};
+    //private String[] currencies = (String[]) Arrays.stream(Divisa.values()).toArray();
+    private final CurrencyService currencyService = new CurrencyService();
     private JPanel contentPane;
     private JButton btnContinuar;
     private JButton btnCancelar;
     private JComboBox cboMonedaOrigen;
     private JComboBox cboMonedaDestino;
-    private JButton btnReiniciar;
+    private Divisa divisaOrigen;
+    private Divisa divisaDestino;
+    private Double valorIngresado;
 
     public CurrencyOption() {
-        contentPane.setSize(300,160);
+        this.setSize(340,200);
         setContentPane(contentPane);
         setModal(true);
         getRootPane().setDefaultButton(btnContinuar);
-        rellenarCbo(cboMonedaOrigen);
-        rellenarCbo(cboMonedaDestino, cboMonedaOrigen.getSelectedItem().toString());
 
+        for (Divisa currency : Divisa.values()) cboMonedaOrigen.addItem(currency.getValue(currency));
+        rellenarCboDestino();
+
+        setDivisas();
 
         btnContinuar.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -45,47 +56,61 @@ public class CurrencyOption extends JDialog {
                 onCancel();
             }
         }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+
         btnCancelar.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.exit(0);
+                dispose();
             }
         });
         btnContinuar.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (cboMonedaOrigen.getSelectedIndex() != -1 || cboMonedaDestino.getSelectedIndex() != -1) {
-                    System.out.println("ok");
-                } else {
-                    System.out.println("indice 0");
+                String numero = ingresarValor();
+
+                while (!esValido(numero)){
+                    numero = ingresarValor();
                 }
+
+                valorIngresado = Double.valueOf(numero);
+                Double resultado;
+
+                try {
+                    resultado = currencyService.convertCurrent(valorIngresado,
+                            divisaOrigen,
+                            divisaDestino);
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
+
+                //String resultadoStr = NumberFormat.getCurrencyInstance(getLocale()).format(resultado);
+
+                StringBuilder sb = new StringBuilder();
+                sb.append("La conversion de ").append(valorIngresado).append(" ")
+                        .append(cboMonedaOrigen.getSelectedItem().toString())
+                                .append(" a ").append(cboMonedaDestino.getSelectedItem().toString())
+                        .append(" es:\n").append(resultado);
+
+                //System.out.println("Resultado: " + resultado);
+                JOptionPane.showConfirmDialog(null, sb.toString(), "Resultado", JOptionPane.DEFAULT_OPTION);
             }
         });
+
         cboMonedaOrigen.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (cboMonedaOrigen.getSelectedIndex() > 0) {
-                    rellenarCbo(cboMonedaDestino, cboMonedaOrigen.getSelectedItem().toString());
-                }
-                cboMonedaOrigen.setEnabled(false);
-                cboMonedaDestino.setEnabled(true);
+                //System.out.println(cboMonedaOrigen.getSelectedIndex());
+                rellenarCboDestino();
+                setDivisas();
+                System.out.println(divisaOrigen.toString());
             }
         });
+
         cboMonedaDestino.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                setearBotones();
-            }
-        });
-        btnReiniciar.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                setearBotones();
-                rellenarCbo(cboMonedaOrigen);
-                rellenarCbo(cboMonedaOrigen, cboMonedaDestino.getSelectedItem().toString());
-                cboMonedaOrigen.setEnabled(true);
-                cboMonedaDestino.setEnabled(false);
-
+                setDivisas();
+                System.out.println(divisaDestino.toString());
             }
         });
     }
@@ -99,28 +124,40 @@ public class CurrencyOption extends JDialog {
         // add your code here if necessary
         dispose();
     }
-
+/*
     public static void main(String[] args) {
         CurrencyOption dialog = new CurrencyOption();
+        dialog.setSize(300,160);
         dialog.setResizable(false);
         dialog.pack();
         dialog.setVisible(true);
         System.exit(0);
-    }
+    }*/
 
-    private void rellenarCbo(JComboBox cbo) {
-        for (String currency : currencies) cbo.addItem(currency);
-    }
+    private void rellenarCboDestino() {
+        cboMonedaDestino.removeAllItems();
 
-    private void rellenarCbo(JComboBox cbo, String valorExcluido) {
-        cbo.removeAllItems();
-        for (String currency : currencies) {
-            if (!currency.equals(valorExcluido)) cbo.addItem(currency);
+        for (Divisa currency : Divisa.values()) {
+            if (!currency.getValue(currency).equals(cboMonedaOrigen.getSelectedItem())) cboMonedaDestino.addItem(currency.getValue(currency));
         }
     }
 
-    private void setearBotones(){
-        btnReiniciar.setEnabled(!btnReiniciar.isEnabled());
-        btnContinuar.setEnabled(!btnContinuar.isEnabled());
+    private void setDivisas(){
+        divisaOrigen = Divisa.ARS.getDivisa(cboMonedaOrigen.getSelectedItem().toString());
+        divisaDestino = Divisa.ARS.getDivisa(cboMonedaDestino.getSelectedItem().toString());
+    }
+
+    private String ingresarValor(){
+        return JOptionPane.showInputDialog("Ingrese el valor a convertir");
+    }
+
+    private Boolean esValido(String value){
+        try {
+            Double.valueOf(value);
+            return true;
+        }catch (NumberFormatException numberFormatException){
+            JOptionPane.showConfirmDialog(null,"Solo se permiten numeros", "Error", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
     }
 }

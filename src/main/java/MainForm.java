@@ -7,12 +7,16 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 
 public class MainForm extends JFrame {
+    private  JPanel contentPane = new JPanel();
     private JComboBox cboConverter = new JComboBox();
     private JButton btnAccept;
     private JButton btnCancel;
-    protected JPanel panel;
+
 
     public MainForm() {
+        this.setSize(350, 200);
+        this.setDefaultCloseOperation(EXIT_ON_CLOSE);
+
         btnAccept.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btnCancel.setCursor(new Cursor(Cursor.HAND_CURSOR));
         cboConverter.setCursor(new Cursor(Cursor.HAND_CURSOR));
@@ -22,12 +26,14 @@ public class MainForm extends JFrame {
         cboConverter.addItem("Temperaturas");
         cboConverter.addItem("Medidas");
 
-        panel = new JPanel();
-        panel.add(cboConverter);
-        panel.add(btnAccept);
-        panel.add(btnCancel);
+        contentPane.add(cboConverter);
+        contentPane.add(btnAccept);
+        contentPane.add(btnCancel);
 
-        panel.setSize(350, 200);
+        this.setContentPane(contentPane);
+
+        contentPane.setSize(350, 200);
+        this.setResizable(false);
 
 
         btnCancel.addActionListener(new ActionListener() {
@@ -67,12 +73,11 @@ public class MainForm extends JFrame {
 
     public static void main(String[] args) throws IOException {
         MainForm mf = new MainForm();
-        mf.setContentPane(new MainForm().panel);
-        mf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        mf.setResizable(false);
+        //mf.setContentPane(new MainForm().panel);
+        //mf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         mf.setVisible(true);
-        mf.pack();
+        //mf.pack();
 
         ExchangerateApi currencyService = new ExchangerateApi();
 
