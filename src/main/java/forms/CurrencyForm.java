@@ -1,34 +1,34 @@
-import model.Divisa;
+package forms;
+
+import model.Currency;
+import services.ConverterService;
 import services.CurrencyService;
 
 import javax.swing.*;
 import java.awt.event.*;
 import java.io.IOException;
 import java.text.NumberFormat;
-import java.util.Arrays;
 
-public class CurrencyOption extends JDialog {
-    //private String[] currencies = (String[]) Arrays.stream(Divisa.values()).toArray();
+public class CurrencyForm extends JDialog {
     private final CurrencyService currencyService = new CurrencyService();
+    private final ConverterService converterService = new ConverterService();
     private JPanel contentPane;
     private JButton btnContinuar;
-    private JButton btnCancelar;
-    private JComboBox cboMonedaOrigen;
-    private JComboBox cboMonedaDestino;
-    private Divisa divisaOrigen;
-    private Divisa divisaDestino;
+    private JButton btnRegresar;
+    private JComboBox<Currency> cboMonedaOrigen;
+    private JComboBox<Currency> cboMonedaDestino;
     private Double valorIngresado;
 
-    public CurrencyOption() {
+    public CurrencyForm() {
         this.setSize(340,200);
+        this.setResizable(false);
+        this.setTitle("Conversor de monedas");
+        setComboBox(cboMonedaOrigen);
+        updateCboDestino();
+
         setContentPane(contentPane);
         setModal(true);
         getRootPane().setDefaultButton(btnContinuar);
-
-        for (Divisa currency : Divisa.values()) cboMonedaOrigen.addItem(currency.getValue(currency));
-        rellenarCboDestino();
-
-        setDivisas();
 
         btnContinuar.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -36,7 +36,7 @@ public class CurrencyOption extends JDialog {
             }
         });
 
-        btnCancelar.addActionListener(new ActionListener() {
+        btnRegresar.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 onCancel();
             }
@@ -57,7 +57,7 @@ public class CurrencyOption extends JDialog {
             }
         }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
-        btnCancelar.addActionListener(new ActionListener() {
+        btnRegresar.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 dispose();
@@ -67,6 +67,7 @@ public class CurrencyOption extends JDialog {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String numero = ingresarValor();
+                if(numero == null) return;
 
                 while (!esValido(numero)){
                     numero = ingresarValor();
@@ -76,41 +77,34 @@ public class CurrencyOption extends JDialog {
                 Double resultado;
 
                 try {
-                    resultado = currencyService.convertCurrent(valorIngresado,
-                            divisaOrigen,
-                            divisaDestino);
+                    resultado = converterService.converterCurrencies(valorIngresado,
+                            ((Currency) cboMonedaOrigen.getSelectedItem()).getAbbreviation(),
+                            ((Currency) cboMonedaDestino.getSelectedItem()).getAbbreviation());
                 } catch (IOException ex) {
                     throw new RuntimeException(ex);
                 }
 
-                //String resultadoStr = NumberFormat.getCurrencyInstance(getLocale()).format(resultado);
+                String resultadoStr = NumberFormat.getCurrencyInstance(getLocale()).format(resultado);
 
-                StringBuilder sb = new StringBuilder();
-                sb.append("La conversion de ").append(valorIngresado).append(" ")
-                        .append(cboMonedaOrigen.getSelectedItem().toString())
-                                .append(" a ").append(cboMonedaDestino.getSelectedItem().toString())
-                        .append(" es:\n").append(resultado);
+                String sb = "La conversion de " + valorIngresado + " " +
+                        cboMonedaOrigen.getSelectedItem().toString() +
+                        " a " + cboMonedaDestino.getSelectedItem().toString() +
+                        " es:\n" + resultadoStr;
 
-                //System.out.println("Resultado: " + resultado);
-                JOptionPane.showConfirmDialog(null, sb.toString(), "Resultado", JOptionPane.DEFAULT_OPTION);
+                JOptionPane.showConfirmDialog(null, sb, "Resultado", JOptionPane.DEFAULT_OPTION);
             }
         });
 
         cboMonedaOrigen.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                //System.out.println(cboMonedaOrigen.getSelectedIndex());
-                rellenarCboDestino();
-                setDivisas();
-                System.out.println(divisaOrigen.toString());
+                updateCboDestino();
             }
         });
 
         cboMonedaDestino.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                setDivisas();
-                System.out.println(divisaDestino.toString());
             }
         });
     }
@@ -124,27 +118,15 @@ public class CurrencyOption extends JDialog {
         // add your code here if necessary
         dispose();
     }
-/*
-    public static void main(String[] args) {
-        CurrencyOption dialog = new CurrencyOption();
-        dialog.setSize(300,160);
-        dialog.setResizable(false);
-        dialog.pack();
-        dialog.setVisible(true);
-        System.exit(0);
-    }*/
 
-    private void rellenarCboDestino() {
+    private void updateCboDestino() {
         cboMonedaDestino.removeAllItems();
-
-        for (Divisa currency : Divisa.values()) {
-            if (!currency.getValue(currency).equals(cboMonedaOrigen.getSelectedItem())) cboMonedaDestino.addItem(currency.getValue(currency));
-        }
+        setComboBox(cboMonedaDestino);
+        cboMonedaDestino.removeItem(cboMonedaOrigen.getSelectedItem());
     }
 
-    private void setDivisas(){
-        divisaOrigen = Divisa.ARS.getDivisa(cboMonedaOrigen.getSelectedItem().toString());
-        divisaDestino = Divisa.ARS.getDivisa(cboMonedaDestino.getSelectedItem().toString());
+    private void setComboBox(JComboBox comboBox){
+        comboBox.setModel(new DefaultComboBoxModel<>(currencyService.getArrayCurrencies()));
     }
 
     private String ingresarValor(){

@@ -3,16 +3,19 @@ package api;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import model.Divisa;
+import model.CurrencyEnum;
 
-import java.io.*;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Properties;
 
 public class ExchangerateApi {
-    private String apiKey;
-    private String url_str;
+    private final String apiKey;
+    private final String url_str;
 
     public ExchangerateApi() throws IOException {
         Properties properties = new Properties();
@@ -23,8 +26,8 @@ public class ExchangerateApi {
         url_str = "https://v6.exchangerate-api.com/v6/" + apiKey + "/latest/";
     }
 
-    public Double getConvertion(Double value, Divisa sourceCurrency, Divisa targetCurrency) throws IOException {
-        URL url = new URL(url_str.concat(targetCurrency.toString()));
+    public Double getConvertion(Double value, CurrencyEnum sourceCurrency, CurrencyEnum targetCurrency) throws IOException {
+        URL url = new URL(url_str.concat(sourceCurrency.name()));
         HttpURLConnection request = (HttpURLConnection) url.openConnection();
         request.connect();
 
@@ -33,7 +36,7 @@ public class ExchangerateApi {
         JsonElement root = jp.parse(new InputStreamReader((InputStream) request.getContent()));
         JsonObject jsonobj = root.getAsJsonObject().get("conversion_rates").getAsJsonObject();
 
-        Double result = jsonobj.get(sourceCurrency.toString()).getAsDouble();
+        Double result = jsonobj.get(targetCurrency.name()).getAsDouble();
 
         return value * result;
 
@@ -43,7 +46,8 @@ public class ExchangerateApi {
         //String req_result = jsonobj.get("result").getAsString();
     }
 
-    /*MODEL:
+    /*
+    EXAMPLE MODEL:
     {
         "result":"success",
             "documentation":"https://www.exchangerate-api.com/docs",

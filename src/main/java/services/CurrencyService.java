@@ -1,8 +1,7 @@
 package services;
 
-import api.ExchangerateApi;
 import model.Currency;
-import model.Divisa;
+import model.CurrencyEnum;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -12,7 +11,7 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 public class CurrencyService {
-    private ArrayList<Currency> currencies = new ArrayList<>();
+    private final ArrayList<Currency> currencies = new ArrayList<>();
 
     public CurrencyService() {
         try {
@@ -30,28 +29,12 @@ public class CurrencyService {
         sc.useDelimiter("[,;\\t\\n\\r]+");
 
         while (sc.hasNext()){
-            Currency currency = new Currency(sc.next(), sc.next());
+            Currency currency = new Currency(sc.next(), CurrencyEnum.valueOf(sc.next()));
             currencies.add(currency);
         }
     }
 
-    public ArrayList<Currency> getCurrencies(){
-        return this.currencies;
-    }
-
-    public Currency getCurrencyByAbbreviation(String abbreviation){
-        return (Currency) this.currencies.stream()
-                .filter(currency -> currency.getAbbreviation() == abbreviation);
-    }
-
-    public Currency getCurrencyByName(String currencyName){
-        return (Currency) this.currencies.stream()
-                .filter(currency -> currency.getCurrencyName() == currencyName);
-    }
-
-    public Double convertCurrent(Double value, Divisa sourceCurrency, Divisa targetCurrency) throws IOException {
-        ExchangerateApi exchangerateApi = new ExchangerateApi();
-
-        return exchangerateApi.getConvertion(value, sourceCurrency, targetCurrency);
+    public Currency[] getArrayCurrencies(){
+        return this.currencies.toArray(new Currency[0]);
     }
 }
