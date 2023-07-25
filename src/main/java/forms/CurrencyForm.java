@@ -20,7 +20,7 @@ public class CurrencyForm extends JDialog {
     private Double valorIngresado;
 
     public CurrencyForm() {
-        this.setSize(340,200);
+        this.setSize(360,200);
         this.setResizable(false);
         this.setTitle("Conversor de monedas");
         setComboBox(cboMonedaOrigen);
