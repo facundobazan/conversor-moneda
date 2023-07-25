@@ -14,16 +14,10 @@ import java.net.URL;
 import java.util.Properties;
 
 public class ExchangerateApi {
-    private final String apiKey;
     private final String url_str;
 
-    public ExchangerateApi() throws IOException {
-        Properties properties = new Properties();
-
-        properties.load(new FileReader("./src/resources.properties"));
-
-        apiKey = properties.getProperty("API-Key");
-        url_str = "https://v6.exchangerate-api.com/v6/" + apiKey + "/latest/";
+    public ExchangerateApi() {
+        url_str = "https://v6.exchangerate-api.com/v6/ea36d1f082c9891cf9f157cd/latest/";
     }
 
     public Double getConvertion(Double value, CurrencyEnum sourceCurrency, CurrencyEnum targetCurrency) throws IOException {

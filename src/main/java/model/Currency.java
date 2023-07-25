@@ -13,6 +13,11 @@ public class Currency {
         setAbbreviation(abbreviation);
     }
 
+    public Currency(String currencyName, String abbreviation) {
+        setCurrencyName(currencyName);
+        setAbbreviation(CurrencyEnum.valueOf(abbreviation));
+    }
+
     public String getCurrencyName() {
         return currencyName;
     }
